@@ -11,9 +11,11 @@ import moriyashiine.bewitchment.common.block.entity.GlyphBlockEntity;
 import moriyashiine.bewitchment.common.block.entity.SigilBlockEntity;
 import moriyashiine.bewitchment.common.entity.living.BaphometEntity;
 import moriyashiine.bewitchment.common.item.AthameItem;
+import moriyashiine.bewitchment.common.item.TaglockItem;
 import moriyashiine.bewitchment.common.recipe.AthameDropRecipe;
 import moriyashiine.bewitchment.common.recipe.IncenseRecipe;
 import moriyashiine.bewitchment.common.registry.*;
+import moriyashiine.bewitchment.common.world.BWUniversalWorldState;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.entity.BlockEntity;
@@ -37,6 +39,7 @@ import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.tag.EntityTypeTags;
@@ -44,6 +47,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -60,11 +64,15 @@ import java.util.List;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin extends Entity implements BloodAccessor, CurseAccessor, ContractAccessor {
+public abstract class LivingEntityMixin extends Entity implements BloodAccessor, FamiliarAccessor, CurseAccessor, ContractAccessor {
 	private static final TrackedData<Integer> BLOOD = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.INTEGER);
+	private static final TrackedData<Boolean> IS_FAMILIAR = DataTracker.registerData(LivingEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 	
 	private final List<Curse.Instance> curses = new ArrayList<>();
 	private final List<Contract.Instance> contracts = new ArrayList<>();
+	
+	@Shadow
+	public abstract EntityGroup getGroup();
 	
 	@Shadow
 	@Nullable
@@ -108,6 +116,16 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 	}
 	
 	@Override
+	public boolean getFamiliar() {
+		return dataTracker.get(IS_FAMILIAR);
+	}
+	
+	@Override
+	public void setFamiliar(boolean familiar) {
+		dataTracker.set(IS_FAMILIAR, familiar);
+	}
+	
+	@Override
 	public List<Curse.Instance> getCurses() {
 		return curses;
 	}
@@ -124,18 +142,19 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 	
 	@ModifyVariable(method = "addStatusEffect", at = @At("HEAD"))
 	private StatusEffectInstance modifyStatusEffect(StatusEffectInstance effect) {
-		if (!world.isClient && hasCurse(BWCurses.COMPROMISED) && ((StatusEffectAccessor) effect.getEffectType()).bw_getType() == StatusEffectType.HARMFUL) {
-			return new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier() + 1);
+		if (!world.isClient && !effect.isAmbient()) {
+			StatusEffectType type = ((StatusEffectAccessor) effect.getEffectType()).bw_getType();
+			if ((type == StatusEffectType.HARMFUL && hasCurse(BWCurses.COMPROMISED)) || (type == StatusEffectType.BENEFICIAL && (Object) this instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == BWEntityTypes.TOAD)) {
+				return new StatusEffectInstance(effect.getEffectType(), effect.getDuration(), effect.getAmplifier() + 1, false, effect.shouldShowParticles());
+			}
 		}
 		return effect;
 	}
 	
 	@ModifyVariable(method = "applyDamage", at = @At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/entity/LivingEntity;getHealth()F"))
 	private float modifyDamage0(float amount, DamageSource source) {
-		if (!world.isClient && BewitchmentAPI.isWeakToSilver((LivingEntity) (Object) this)) {
-			if (BewitchmentAPI.isSourceFromSilver(source)) {
-				return amount + 4;
-			}
+		if (!world.isClient && BewitchmentAPI.isWeakToSilver((LivingEntity) (Object) this) && BewitchmentAPI.isSourceFromSilver(source)) {
+			return amount + 4;
 		}
 		return amount;
 	}
@@ -150,7 +169,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 				if (!poppet.isEmpty()) {
 					LivingEntity owner = BewitchmentAPI.getTaglockOwner(world, poppet);
 					if (!getUuid().equals(owner.getUuid()) && owner.damage(BWDamageSources.VAMPIRE, amount)) {
-						if (poppet.damage((int) amount, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+						if (poppet.damage((int) (amount * (BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0.5f : 1)), random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 							poppet.decrement(1);
 						}
 						return 0;
@@ -160,7 +179,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 			if (source.isFire() || source == DamageSource.DROWN || source == DamageSource.FALL || source == DamageSource.FLY_INTO_WALL) {
 				ItemStack poppet = BewitchmentAPI.getPoppet(world, BWObjects.PROTECTION_POPPET, this, null);
 				if (!poppet.isEmpty()) {
-					if (poppet.damage((int) amount, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+					if (poppet.damage((int) (amount * ((Object) this instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0.5f : 1)), random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 						poppet.decrement(1);
 					}
 					return 0;
@@ -169,7 +188,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 			if (getHealth() - amount <= 0) {
 				ItemStack poppet = BewitchmentAPI.getPoppet(world, BWObjects.DEATH_PROTECTION_POPPET, this, null);
 				if (!poppet.isEmpty()) {
-					if (poppet.damage(1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+					if (poppet.damage((Object) this instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 						poppet.decrement(1);
 					}
 					heal(Float.MAX_VALUE);
@@ -191,7 +210,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 			if (trueSource instanceof PlayerEntity && BewitchmentAPI.isWeakToSilver((LivingEntity) trueSource)) {
 				ItemStack poppet = BewitchmentAPI.getPoppet(world, BWObjects.JUDGMENT_POPPET, this, null);
 				if (!poppet.isEmpty()) {
-					if (poppet.damage(1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+					if (poppet.damage((Object) this instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 						poppet.decrement(1);
 					}
 					amount /= 4;
@@ -199,7 +218,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 			}
 			if (directSource instanceof LivingEntity) {
 				ItemStack poppet = BewitchmentAPI.getPoppet(world, BWObjects.FATIGUE_POPPET, this, null);
-				if (!poppet.isEmpty() && ((LivingEntity) directSource).addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 60, 1)) && poppet.damage(1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+				if (!poppet.isEmpty() && ((LivingEntity) directSource).addStatusEffect(new StatusEffectInstance(StatusEffects.WEAKNESS, 60, 1)) && poppet.damage((Object) this instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 					poppet.decrement(1);
 				}
 			}
@@ -264,6 +283,9 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 					amount *= (1 - (0.2f * armorPieces));
 				}
 			}
+			if (getFamiliar()) {
+				amount /= 8;
+			}
 		}
 		return amount;
 	}
@@ -312,11 +334,30 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 				}
 			}
 		}
+		if (getFamiliar()) {
+			if (!world.isClient) {
+				if (age % 100 == 0) {
+					heal(1);
+				}
+			}
+			else {
+				world.addParticle(ParticleTypes.ENCHANT, getParticleX(getWidth()), getY() + MathHelper.nextFloat(random, 0, getHeight()), getParticleZ(getWidth()), 0, 0, 0);
+			}
+		}
 	}
 	
 	@Inject(method = "damage", at = @At("HEAD"), cancellable = true)
 	private void damage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callbackInfo) {
 		if (!world.isClient) {
+			Entity attacker = source.getSource();
+			if (attacker instanceof PlayerEntity) {
+				ItemStack stack = ((PlayerEntity) attacker).getMainHandStack();
+				if (stack.getItem() instanceof TaglockItem) {
+					TaglockItem.useTaglock((PlayerEntity) attacker, (LivingEntity) (Object) this, Hand.MAIN_HAND, true, false);
+					callbackInfo.setReturnValue(false);
+					return;
+				}
+			}
 			InsanityTargetAccessor insanityTargetAccessor = InsanityTargetAccessor.of(this).orElse(null);
 			if (insanityTargetAccessor != null && insanityTargetAccessor.getInsanityTargetUUID().isPresent()) {
 				callbackInfo.setReturnValue(false);
@@ -328,17 +369,22 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 					return;
 				}
 			}
-			Entity attacker = source.getSource();
 			if (!source.isOutOfWorld() && (hasStatusEffect(BWStatusEffects.ETHEREAL) || (attacker instanceof LivingEntity && ((LivingEntity) attacker).hasStatusEffect(BWStatusEffects.ETHEREAL)))) {
 				callbackInfo.setReturnValue(false);
+				return;
 			}
-			else if (hasStatusEffect(BWStatusEffects.DEFLECTION) && attacker != null && EntityTypeTags.ARROWS.contains(attacker.getType())) {
+			if (source == DamageSource.FALL && (Object) this instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == BWEntityTypes.OWL) {
+				callbackInfo.setReturnValue(false);
+				return;
+			}
+			if (hasStatusEffect(BWStatusEffects.DEFLECTION) && attacker != null && EntityTypeTags.ARROWS.contains(attacker.getType())) {
 				int amplifier = getStatusEffect(BWStatusEffects.DEFLECTION).getAmplifier() + 1;
 				Vec3d velocity = attacker.getVelocity();
 				attacker.setVelocity(velocity.getX() * 2 * amplifier, velocity.getY() * 2 * amplifier, velocity.getZ() * 2 * amplifier);
 				callbackInfo.setReturnValue(false);
+				return;
 			}
-			else if (amount > 0) {
+			if (amount > 0) {
 				if (hasStatusEffect(BWStatusEffects.LEECHING)) {
 					heal(amount * (getStatusEffect(BWStatusEffects.LEECHING).getAmplifier() + 1) / 4);
 				}
@@ -365,12 +411,12 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 					if (!poppet.isEmpty()) {
 						LivingEntity owner = BewitchmentAPI.getTaglockOwner(world, poppet);
 						if (!owner.getUuid().equals(getUuid())) {
-							if (poppet.damage(1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+							if (poppet.damage(BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 								poppet.decrement(1);
 							}
 							ItemStack potentialPoppet = BewitchmentAPI.getPoppet(world, BWObjects.VOODOO_PROTECTION_POPPET, owner, null);
 							if (!potentialPoppet.isEmpty()) {
-								if (potentialPoppet.damage(1, random, null) && potentialPoppet.getDamage() >= potentialPoppet.getMaxDamage()) {
+								if (potentialPoppet.damage(owner instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) owner) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && potentialPoppet.getDamage() >= potentialPoppet.getMaxDamage()) {
 									potentialPoppet.decrement(1);
 								}
 								return;
@@ -451,10 +497,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 					}
 					if (livingAttacker instanceof PlayerEntity && livingAttacker.getOffHandStack().getItem() == Items.GLASS_BOTTLE && getBlood() > 30) {
 						world.playSound(null, attacker.getBlockPos(), SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.PLAYERS, 1, 0.5f);
-						ItemStack bloodBottle = new ItemStack(BWObjects.BOTTLE_OF_BLOOD);
-						bloodBottle.getOrCreateTag().putUuid("OwnerUUID", getUuid());
-						bloodBottle.getOrCreateTag().putString("OwnerName", getDisplayName().getString());
-						BewitchmentAPI.addItemToInventoryAndConsume((PlayerEntity) livingAttacker, Hand.OFF_HAND, bloodBottle);
+						BewitchmentAPI.addItemToInventoryAndConsume((PlayerEntity) livingAttacker, Hand.OFF_HAND, new ItemStack(BWObjects.BOTTLE_OF_BLOOD));
 					}
 				}
 			}
@@ -473,6 +516,17 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 					if (glyph != null) {
 						((GlyphBlockEntity) world.getBlockEntity(glyph)).onUse(world, glyph, player, Hand.MAIN_HAND, (LivingEntity) (Object) this);
 					}
+				}
+				if (getGroup() == EntityGroup.ARTHROPOD && BewitchmentAPI.getFamiliar(player) == BWEntityTypes.TOAD) {
+					player.heal(player.getMaxHealth() * 1 / 4f);
+				}
+			}
+			BWUniversalWorldState worldState = BWUniversalWorldState.get(world);
+			for (int i = worldState.familiars.size() - 1; i >= 0; i--) {
+				if (getUuid().equals(worldState.familiars.get(i).getRight().getUuid("UUID"))) {
+					worldState.familiars.remove(i);
+					worldState.markDirty();
+					break;
 				}
 			}
 		}
@@ -494,24 +548,24 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 						durationMultiplier = 2;
 					}
 				}
-				addStatusEffect(new StatusEffectInstance(recipe.effect, 24000 * durationMultiplier, recipe.amplifier, false, false));
+				addStatusEffect(new StatusEffectInstance(recipe.effect, 24000 * durationMultiplier, recipe.amplifier, true, false));
 			});
 		}
 	}
 	
 	@Inject(method = "addStatusEffect", at = @At("HEAD"))
 	private void addStatusEffect(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> callbackInfo) {
-		if (!world.isClient && (Object) this instanceof PlayerEntity) {
+		if (!world.isClient && !effect.isAmbient() && (Object) this instanceof PlayerEntity) {
 			ItemStack poppet = BewitchmentAPI.getPoppet(world, BWObjects.VOODOO_POPPET, null, (PlayerEntity) (Object) this);
 			if (!poppet.isEmpty()) {
 				LivingEntity owner = BewitchmentAPI.getTaglockOwner(world, poppet);
 				if (!owner.getUuid().equals(getUuid())) {
-					if (poppet.damage(1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
+					if (poppet.damage(BewitchmentAPI.getFamiliar((PlayerEntity) (Object) this) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && poppet.getDamage() >= poppet.getMaxDamage()) {
 						poppet.decrement(1);
 					}
 					ItemStack potentialPoppet = BewitchmentAPI.getPoppet(world, BWObjects.VOODOO_PROTECTION_POPPET, owner, null);
 					if (!potentialPoppet.isEmpty()) {
-						if (potentialPoppet.damage(1, random, null) && potentialPoppet.getDamage() >= potentialPoppet.getMaxDamage()) {
+						if (potentialPoppet.damage(owner instanceof PlayerEntity && BewitchmentAPI.getFamiliar((PlayerEntity) owner) == EntityType.WOLF && random.nextBoolean() ? 0 : 1, random, null) && potentialPoppet.getDamage() >= potentialPoppet.getMaxDamage()) {
 							potentialPoppet.decrement(1);
 						}
 						return;
@@ -527,6 +581,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 		if (BWTags.HAS_BLOOD.contains(getType())) {
 			setBlood(tag.getInt("Blood"));
 		}
+		setFamiliar(tag.getBoolean("IsFamiliar"));
 		ListTag curses = tag.getList("Curses", NbtType.COMPOUND);
 		for (int i = 0; i < curses.size(); i++) {
 			CompoundTag curse = curses.getCompound(i);
@@ -544,6 +599,7 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 		if (BWTags.HAS_BLOOD.contains(getType())) {
 			tag.putInt("Blood", getBlood());
 		}
+		tag.putBoolean("IsFamiliar", getFamiliar());
 		ListTag curses = new ListTag();
 		for (Curse.Instance instance : getCurses()) {
 			CompoundTag curseTag = new CompoundTag();
@@ -567,5 +623,6 @@ public abstract class LivingEntityMixin extends Entity implements BloodAccessor,
 		if (BWTags.HAS_BLOOD.contains(getType())) {
 			dataTracker.startTracking(BLOOD, MAX_BLOOD);
 		}
+		dataTracker.startTracking(IS_FAMILIAR, false);
 	}
 }

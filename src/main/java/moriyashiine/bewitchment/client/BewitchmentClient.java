@@ -54,7 +54,6 @@ public class BewitchmentClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(SpawnSmokeParticlesPacket.ID, SpawnSmokeParticlesPacket::handle);
 		ClientPlayNetworking.registerGlobalReceiver(SpawnPortalParticlesPacket.ID, SpawnPortalParticlesPacket::handle);
 		ClientPlayNetworking.registerGlobalReceiver(SpawnExplosionParticlesPacket.ID, SpawnExplosionParticlesPacket::handle);
-		ClientPlayNetworking.registerGlobalReceiver(SpawnBrazierParticlesPacket.ID, SpawnBrazierParticlesPacket::handle);
 		ParticleFactoryRegistry.getInstance().register(BWParticleTypes.CAULDRON_BUBBLE, CauldronBubbleParticle.Factory::new);
 		ParticleFactoryRegistry.getInstance().register(BWParticleTypes.INCENSE_SMOKE, IncenseSmokeParticle.Factory::new);
 		ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) -> 0xffff00, BWObjects.GOLDEN_GLYPH);
@@ -97,7 +96,6 @@ public class BewitchmentClient implements ClientModInitializer {
 		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.SNAKE, (dispatcher, context) -> new SnakeEntityRenderer(dispatcher));
 		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.TOAD, (dispatcher, context) -> new ToadEntityRenderer(dispatcher));
 		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.GHOST, (dispatcher, context) -> new GhostEntityRenderer(dispatcher));
-		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.BLACK_DOG, (dispatcher, context) -> new BlackDogEntityRenderer(dispatcher));
 		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.HELLHOUND, (dispatcher, context) -> new HellhoundEntityRenderer(dispatcher));
 		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.DEMON, (dispatcher, context) -> new DemonEntityRenderer(dispatcher));
 		EntityRendererRegistry.INSTANCE.register(BWEntityTypes.LEONARD, (dispatcher, context) -> new LeonardEntityRenderer(dispatcher));
@@ -108,7 +106,7 @@ public class BewitchmentClient implements ClientModInitializer {
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.CYPRESS_SAPLING, BWObjects.POTTED_CYPRESS_SAPLING, BWObjects.CYPRESS_DOOR, BWObjects.CYPRESS_TRAPDOOR);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.ELDER_SAPLING, BWObjects.POTTED_ELDER_SAPLING, BWObjects.ELDER_DOOR, BWObjects.ELDER_TRAPDOOR);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.DRAGONS_BLOOD_SAPLING, BWObjects.POTTED_DRAGONS_BLOOD_SAPLING, BWObjects.DRAGONS_BLOOD_DOOR, BWObjects.DRAGONS_BLOOD_TRAPDOOR);
-		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.SPANISH_MOSS, BWObjects.GLOWING_BRAMBLE, BWObjects.ENDER_BRAMBLE, BWObjects.FRUITING_BRAMBLE, BWObjects.SCORCHED_BRAMBLE, BWObjects.THICK_BRAMBLE, BWObjects.FLEETING_BRAMBLE);
+		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.GLOWING_BRAMBLE, BWObjects.ENDER_BRAMBLE, BWObjects.FRUITING_BRAMBLE, BWObjects.SCORCHED_BRAMBLE, BWObjects.THICK_BRAMBLE, BWObjects.FLEETING_BRAMBLE);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.STONE_WITCH_ALTAR);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.MOSSY_COBBLESTONE_WITCH_ALTAR);
 		BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), BWObjects.PRISMARINE_WITCH_ALTAR);

@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityGroup;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.EntityDamageSource;
@@ -23,14 +24,17 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 import java.util.*;
@@ -123,9 +127,24 @@ public class BewitchmentAPI {
 		return ItemStack.EMPTY;
 	}
 	
+	public static EntityType<?> getFamiliar(PlayerEntity player) {
+		World world = player.world;
+		if (!world.isClient) {
+			for (Pair<UUID, CompoundTag> pair : BWUniversalWorldState.get(world).familiars) {
+				if (player.getUuid().equals(pair.getLeft())) {
+					return Registry.ENTITY_TYPE.get(new Identifier(pair.getRight().getString("id")));
+				}
+			}
+		}
+		return null;
+	}
+	
 	public static boolean isSourceFromSilver(DamageSource source) {
 		Entity attacker = source.getAttacker();
-		return !(source instanceof EntityDamageSource && ((EntityDamageSource) source).isThorns()) && (attacker instanceof LivingEntity && isHoldingSilver((LivingEntity) attacker, Hand.MAIN_HAND)) || attacker instanceof SilverArrowEntity;
+		if (source instanceof EntityDamageSource && ((EntityDamageSource) source).isThorns()) {
+			return false;
+		}
+		return (attacker instanceof LivingEntity && isHoldingSilver((LivingEntity) attacker, Hand.MAIN_HAND)) || attacker instanceof SilverArrowEntity;
 	}
 	
 	public static boolean isHoldingSilver(LivingEntity livingEntity, Hand hand) {
@@ -133,7 +152,10 @@ public class BewitchmentAPI {
 	}
 	
 	public static boolean isWeakToSilver(LivingEntity livingEntity) {
-		return BWTags.WEAK_TO_SILVER.contains(livingEntity.getType());
+		if (BWTags.IMMUNE_TO_SILVER.contains(livingEntity.getType())) {
+			return false;
+		}
+		return livingEntity.isUndead() || livingEntity.getGroup() == DEMON || BWTags.VULNERABLE_TO_SILVER.contains(livingEntity.getType());
 	}
 	
 	public static boolean hasPledge(World world, UUID entity) {

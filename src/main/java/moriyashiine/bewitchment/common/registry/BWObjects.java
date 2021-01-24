@@ -166,7 +166,6 @@ public class BWObjects {
 	public static final Item DRAGONS_BLOOD_SIGN_ITEM = create("dragons_blood_sign", new SignItem(gen().maxCount(16), DRAGONS_BLOOD_SIGN, DRAGONS_BLOOD_WALL_SIGN));
 	public static final TerraformBoatItem DRAGONS_BLOOD_BOAT = create("dragons_blood_boat", new TerraformBoatItem(() -> BWEntityTypes.DRAGONS_BLOOD_BOAT, gen().maxCount(1)));
 	//other_plants
-	public static final Block SPANISH_MOSS = create("spanish_moss", new VineBlock(copyOf(Blocks.VINE)), true);
 	public static final Block GLOWING_BRAMBLE = create("glowing_bramble", new BrambleBlock(of(Material.PLANT).sounds(BlockSoundGroup.GRASS).strength(2, 3).noCollision().ticksRandomly().luminance(15)), true);
 	public static final Block ENDER_BRAMBLE = create("ender_bramble", new BrambleBlock(of(Material.PLANT).sounds(BlockSoundGroup.GRASS).strength(2, 3).noCollision().ticksRandomly()), true);
 	public static final Block FRUITING_BRAMBLE = create("fruiting_bramble", new BrambleBlock.Fruiting(copyOf(ENDER_BRAMBLE)), true);
@@ -300,7 +299,7 @@ public class BWObjects {
 	public static final Item ECTOPLASM = create("ectoplasm", new Item(gen()));
 	public static final Item DEMON_HORN = create("demon_horn", new Item(gen().fireproof()));
 	public static final Item DEMON_HEART = create("demon_heart", new Item(gen().food(BWFoodComponents.DEMON_HEART).rarity(Rarity.UNCOMMON).fireproof()));
-	public static final Item BOTTLE_OF_BLOOD = create("bottle_of_blood", new BottleOfBloodItem(gen().maxCount(1).recipeRemainder(Items.GLASS_BOTTLE)));
+	public static final Item BOTTLE_OF_BLOOD = create("bottle_of_blood", new BottleOfBloodItem(gen().maxCount(16).recipeRemainder(Items.GLASS_BOTTLE)));
 	public static final Item GRILLED_GARLIC = create("grilled_garlic", new Item(gen().food(FoodComponents.BAKED_POTATO)));
 	public static final Item GARLIC_BREAD = create("garlic_bread", new Item(gen().food(FoodComponents.PUMPKIN_PIE)));
 	public static final Item WITCHBERRY = create("witchberry", new Item(gen().food(BWFoodComponents.WITCHBERRY)));
@@ -313,7 +312,6 @@ public class BWObjects {
 	public static final Item SNAKE_SPAWN_EGG = create("snake_spawn_egg", new SpawnEggItem(BWEntityTypes.SNAKE, 0x7f3f00, 0x3f3f3f, gen()));
 	public static final Item TOAD_SPAWN_EGG = create("toad_spawn_egg", new SpawnEggItem(BWEntityTypes.TOAD, 0x3f3f00, 0x00c200, gen()));
 	public static final Item GHOST_SPAWN_EGG = create("ghost_spawn_egg", new SpawnEggItem(BWEntityTypes.GHOST, 0xcacaca, 0x969696, gen()));
-	public static final Item BLACK_DOG_SPAWN_EGG = create("black_dog_spawn_egg", new SpawnEggItem(BWEntityTypes.BLACK_DOG, 0x141414, 0x212121, gen()));
 	public static final Item HELLHOUND_SPAWN_EGG = create("hellhound_spawn_egg", new SpawnEggItem(BWEntityTypes.HELLHOUND, 0xc82000, 0x802020, gen()));
 	public static final Item DEMON_SPAWN_EGG = create("demon_spawn_egg", new SpawnEggItem(BWEntityTypes.DEMON, 0x802020, 0xc82000, gen()));
 	public static final Item LEONARD_SPAWN_EGG = create("leonard_spawn_egg", new SpawnEggItem(BWEntityTypes.LEONARD, 0x5e3214, 0xa00303, gen()));
@@ -405,7 +403,6 @@ public class BWObjects {
 		flammableRegistry.add(DRAGONS_BLOOD_SLAB, 5, 20);
 		flammableRegistry.add(DRAGONS_BLOOD_FENCE, 5, 20);
 		flammableRegistry.add(DRAGONS_BLOOD_FENCE_GATE, 5, 20);
-		flammableRegistry.add(SPANISH_MOSS, 15, 100);
 		flammableRegistry.add(HEDGEWITCH_WOOL, 30, 60);
 		flammableRegistry.add(ALCHEMIST_WOOL, 30, 60);
 		flammableRegistry.add(BESMIRCHED_WOOL, 30, 60);
@@ -421,7 +418,6 @@ public class BWObjects {
 		compostRegistry.add(ELDER_SAPLING, 0.3f);
 		compostRegistry.add(DRAGONS_BLOOD_LEAVES, 0.3f);
 		compostRegistry.add(DRAGONS_BLOOD_SAPLING, 0.3f);
-		compostRegistry.add(SPANISH_MOSS, 0.5f);
 		compostRegistry.add(ACONITE, 0.65f);
 		compostRegistry.add(ACONITE_SEEDS, 0.3f);
 		compostRegistry.add(BELLADONNA, 0.65f);
