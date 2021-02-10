@@ -13,6 +13,7 @@ public class BWTags {
 	public static final Tag<EntityType<?>> VULNERABLE_TO_SILVER = TagRegistry.entityType(new Identifier(Bewitchment.MODID, "vulnerable_to_silver"));
 	public static final Tag<EntityType<?>> IMMUNE_TO_SILVER = TagRegistry.entityType(new Identifier(Bewitchment.MODID, "immune_to_silver"));
 	public static final Tag<EntityType<?>> HAS_BLOOD = TagRegistry.entityType(new Identifier(Bewitchment.MODID, "has_blood"));
+	public static final Tag<EntityType<?>> UNTAGLOCKABLE = TagRegistry.entityType(new Identifier(Bewitchment.MODID, "untaglockable"));
 	public static final Tag<EntityType<?>> ENCOUNTER_FORTUNE = TagRegistry.entityType(new Identifier(Bewitchment.MODID, "encounter_fortune"));
 	public static final Tag<EntityType<?>> INSANITY_BLACKLIST = TagRegistry.entityType(new Identifier(Bewitchment.MODID, "insanity_blacklist"));
 	
@@ -20,6 +21,7 @@ public class BWTags {
 	public static final Tag<Item> ORES = TagRegistry.item(new Identifier("c", "ores"));
 	public static final Tag<Block> GIVES_ALTAR_POWER = TagRegistry.block(new Identifier(Bewitchment.MODID, "gives_altar_power"));
 	public static final Tag<Block> HEATS_CAULDRON = TagRegistry.block(new Identifier(Bewitchment.MODID, "heats_cauldron"));
+	public static final Tag<Block> UNDEAD_MASK = TagRegistry.block(new Identifier(Bewitchment.MODID, "undead_mask"));
 	
 	public static final Tag<Item> SILVER_ARMOR = TagRegistry.item(new Identifier(Bewitchment.MODID, "silver_armor"));
 	public static final Tag<Item> SILVER_TOOLS = TagRegistry.item(new Identifier(Bewitchment.MODID, "silver_tools"));

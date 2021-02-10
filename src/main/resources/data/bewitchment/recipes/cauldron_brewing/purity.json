@@ -1,0 +1,8 @@
+{
+  "type": "bewitchment:cauldron_brewing_recipe",
+  "ingredient": {
+	"item": "bewitchment:birch_bark"
+  },
+  "effect": "bewitchment:purity",
+  "time": 2400
+}

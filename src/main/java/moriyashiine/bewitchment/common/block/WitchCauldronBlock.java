@@ -1,10 +1,10 @@
 package moriyashiine.bewitchment.common.block;
 
-import moriyashiine.bewitchment.api.BewitchmentAPI;
 import moriyashiine.bewitchment.api.block.WitchAltarBlock;
 import moriyashiine.bewitchment.api.interfaces.block.entity.UsesAltarPower;
 import moriyashiine.bewitchment.common.block.entity.WitchAltarBlockEntity;
 import moriyashiine.bewitchment.common.block.entity.WitchCauldronBlockEntity;
+import moriyashiine.bewitchment.common.misc.BWUtil;
 import moriyashiine.bewitchment.common.recipe.OilRecipe;
 import moriyashiine.bewitchment.common.registry.BWTags;
 import moriyashiine.bewitchment.common.world.BWWorldState;
@@ -100,7 +100,6 @@ public class WitchCauldronBlock extends CauldronBlock implements BlockEntityProv
 				if (!client) {
 					if (nameTag && stack.hasCustomName()) {
 						cauldron.customName = stack.getName();
-						cauldron.syncCauldron();
 						if (!player.isCreative()) {
 							stack.decrement(1);
 						}
@@ -109,10 +108,10 @@ public class WitchCauldronBlock extends CauldronBlock implements BlockEntityProv
 						int targetLevel = cauldron.getTargetLevel(stack);
 						if (targetLevel > -1) {
 							if (bucket) {
-								BewitchmentAPI.addItemToInventoryAndConsume(player, hand, new ItemStack(Items.WATER_BUCKET));
+								BWUtil.addItemToInventoryAndConsume(player, hand, new ItemStack(Items.WATER_BUCKET));
 							}
 							else if (waterBucket) {
-								BewitchmentAPI.addItemToInventoryAndConsume(player, hand, new ItemStack(Items.BUCKET));
+								BWUtil.addItemToInventoryAndConsume(player, hand, new ItemStack(Items.BUCKET));
 							}
 							else if (glassBottle) {
 								ItemStack bottle = null;
@@ -141,20 +140,20 @@ public class WitchCauldronBlock extends CauldronBlock implements BlockEntityProv
 									}
 								}
 								if (bottle != null) {
-									BewitchmentAPI.addItemToInventoryAndConsume(player, hand, bottle);
+									BWUtil.addItemToInventoryAndConsume(player, hand, bottle);
 								}
 							}
 							else if (waterBottle) {
-								BewitchmentAPI.addItemToInventoryAndConsume(player, hand, new ItemStack(Items.GLASS_BOTTLE));
+								BWUtil.addItemToInventoryAndConsume(player, hand, new ItemStack(Items.GLASS_BOTTLE));
 							}
 							if (targetLevel == 0) {
 								cauldron.mode = cauldron.reset();
-								cauldron.syncCauldron();
 							}
 							world.setBlockState(pos, state.with(Properties.LEVEL_3, targetLevel));
 							world.playSound(null, pos, bucket ? SoundEvents.ITEM_BUCKET_FILL : waterBucket ? SoundEvents.ITEM_BUCKET_EMPTY : glassBottle ? SoundEvents.ITEM_BOTTLE_FILL : SoundEvents.ITEM_BOTTLE_EMPTY, SoundCategory.BLOCKS, 1, 1);
 						}
 					}
+					cauldron.syncCauldron();
 				}
 			}
 			return ActionResult.success(client);

@@ -1,11 +1,13 @@
 package moriyashiine.bewitchment.mixin;
 
 import moriyashiine.bewitchment.common.entity.living.BaphometEntity;
+import moriyashiine.bewitchment.common.entity.living.LilithEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.projectile.ExplosiveProjectileEntity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.WitherSkullEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,10 +20,16 @@ public abstract class ExplosiveProjectileEntityMixin extends Entity {
 		super(type, world);
 	}
 	
-	@Inject(method = "method_26958", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "method_26958", at = @At("RETURN"), cancellable = true)
 	private void method_26958(Entity entity, CallbackInfoReturnable<Boolean> callbackInfo) {
-		if (!world.isClient && ((ProjectileEntity) (Object) this).getOwner() instanceof BaphometEntity && entity instanceof FireballEntity) {
-			callbackInfo.setReturnValue(false);
+		if (callbackInfo.getReturnValue() && !world.isClient) {
+			Entity owner = ((ProjectileEntity) (Object) this).getOwner();
+			if (owner instanceof BaphometEntity && entity instanceof FireballEntity) {
+				callbackInfo.setReturnValue(false);
+			}
+			else if (owner instanceof LilithEntity && entity instanceof WitherSkullEntity) {
+				callbackInfo.setReturnValue(false);
+			}
 		}
 	}
 }

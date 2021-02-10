@@ -15,7 +15,7 @@ public class BWConfig implements ConfigData {
 	
 	public final int saltSize = 12;
 	public final int saltMaxHeight = 96;
-	public final int saltCount = 8;
+	public final int saltCount = 6;
 	
 	public final List<String> owlBiomeCategories = Arrays.asList(Biome.Category.TAIGA.getName(), Biome.Category.FOREST.getName());
 	public final int owlWeight = 10;
@@ -45,5 +45,15 @@ public class BWConfig implements ConfigData {
 	public final int hellhoundMinGroupCount = 1;
 	public final int hellhoundMaxGroupCount = 1;
 	
+	public final int vampireWeight = 10;
+	public final int vampireMinGroupCount = 1;
+	public final int vampireMaxGroupCount = 1;
+	
+	public final int werewolfWeight = 10;
+	public final int werewolfMinGroupCount = 1;
+	public final int werewolfMaxGroupCount = 1;
+	
 	public final boolean doDemonTradesRefresh = true;
+	
+	public final boolean enableTaglockCommand = false;
 }

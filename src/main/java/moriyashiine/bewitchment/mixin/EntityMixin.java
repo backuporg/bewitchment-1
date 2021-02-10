@@ -1,10 +1,10 @@
 package moriyashiine.bewitchment.mixin;
 
 import moriyashiine.bewitchment.api.BewitchmentAPI;
-import moriyashiine.bewitchment.api.interfaces.entity.InsanityTargetAccessor;
-import moriyashiine.bewitchment.api.interfaces.entity.MasterAccessor;
 import moriyashiine.bewitchment.api.interfaces.entity.Pledgeable;
-import moriyashiine.bewitchment.api.interfaces.entity.WetAccessor;
+import moriyashiine.bewitchment.common.entity.interfaces.InsanityTargetAccessor;
+import moriyashiine.bewitchment.common.entity.interfaces.MasterAccessor;
+import moriyashiine.bewitchment.common.entity.interfaces.WetAccessor;
 import moriyashiine.bewitchment.common.registry.BWObjects;
 import moriyashiine.bewitchment.common.world.BWUniversalWorldState;
 import net.minecraft.entity.Entity;
@@ -40,14 +40,14 @@ public abstract class EntityMixin implements WetAccessor {
 	public abstract UUID getUuid();
 	
 	@Shadow
+	public abstract boolean isOnFire();
+	
+	@Shadow
 	public World world;
 	
 	@Shadow
 	@Final
 	protected Random random;
-	
-	@Shadow
-	public abstract boolean isOnFire();
 	
 	@Shadow
 	@Final
@@ -63,35 +63,35 @@ public abstract class EntityMixin implements WetAccessor {
 		dataTracker.set(WET_TIMER, wetTimer);
 	}
 	
-	@Inject(method = "isWet", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "isWet", at = @At("RETURN"), cancellable = true)
 	private void isWet(CallbackInfoReturnable<Boolean> callbackInfo) {
-		if (getWetTimer() > 0) {
+		if (!callbackInfo.getReturnValue() && getWetTimer() > 0) {
 			callbackInfo.setReturnValue(true);
 		}
 	}
 	
-	@Inject(method = "isTouchingWaterOrRain", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "isTouchingWaterOrRain", at = @At("RETURN"), cancellable = true)
 	private void isTouchingWaterOrRain(CallbackInfoReturnable<Boolean> callbackInfo) {
-		if (getWetTimer() > 0) {
+		if (!callbackInfo.getReturnValue() && getWetTimer() > 0) {
 			callbackInfo.setReturnValue(true);
 		}
 	}
 	
-	@Inject(method = "isInvulnerableTo", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "isInvulnerableTo", at = @At("RETURN"), cancellable = true)
 	private void isInvulnerableTo(DamageSource source, CallbackInfoReturnable<Boolean> callbackInfo) {
-		if (!world.isClient && (Object) this instanceof LivingEntity) {
+		if (!callbackInfo.getReturnValue() && !world.isClient && this instanceof MasterAccessor) {
 			Entity attacker = source.getAttacker();
 			if (attacker instanceof LivingEntity) {
-				MasterAccessor.of(this).ifPresent(masterAccessor -> {
-					if (attacker.getUuid().equals(masterAccessor.getMasterUUID())) {
+				if (this instanceof MasterAccessor) {
+					if (attacker.getUuid().equals(((MasterAccessor) this).getMasterUUID())) {
 						callbackInfo.setReturnValue(true);
 					}
-				});
-				MasterAccessor.of(attacker).ifPresent(masterAccessor -> {
-					if (getUuid().equals(masterAccessor.getMasterUUID())) {
+				}
+				if (attacker instanceof MasterAccessor) {
+					if (getUuid().equals(((MasterAccessor) attacker).getMasterUUID())) {
 						callbackInfo.setReturnValue(true);
 					}
-				});
+				}
 			}
 		}
 	}
@@ -125,22 +125,20 @@ public abstract class EntityMixin implements WetAccessor {
 					}
 				}
 			}
-			InsanityTargetAccessor.of(this).ifPresent(insanityTargetAccessor -> {
-				if (insanityTargetAccessor.getInsanityTargetUUID().isPresent()) {
-					callbackInfo.cancel();
-				}
-			});
+			if (this instanceof InsanityTargetAccessor && ((InsanityTargetAccessor) this).getInsanityTargetUUID().isPresent()) {
+				callbackInfo.cancel();
+			}
 		}
 	}
 	
-	@Inject(method = "remove", at = @At("HEAD"))
+	@Inject(method = "remove", at = @At("TAIL"))
 	private void remove(CallbackInfo callbackInfo) {
 		if (!world.isClient && this instanceof Pledgeable) {
 			BWUniversalWorldState worldState = BWUniversalWorldState.get(world);
 			for (int i = worldState.specificPledges.size() - 1; i >= 0; i--) {
 				Pair<UUID, UUID> pair = worldState.specificPledges.get(i);
-				if (pair.getLeft().equals(getUuid())) {
-					BewitchmentAPI.unpledge(world, ((Pledgeable) this).getPledgeUUID(), pair.getLeft());
+				if (pair.getRight().equals(getUuid())) {
+					BewitchmentAPI.unpledge(world, ((Pledgeable) this).getPledgeID(), pair.getLeft());
 					worldState.specificPledges.remove(i);
 					worldState.markDirty();
 				}

@@ -2,6 +2,9 @@ package moriyashiine.bewitchment.mixin;
 
 import com.mojang.authlib.GameProfile;
 import moriyashiine.bewitchment.api.interfaces.entity.*;
+import moriyashiine.bewitchment.common.entity.interfaces.PolymorphAccessor;
+import moriyashiine.bewitchment.common.entity.interfaces.RespawnTimerAccessor;
+import moriyashiine.bewitchment.common.entity.interfaces.WerewolfAccessor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -20,16 +23,18 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
 	@Inject(method = "copyFrom", at = @At("TAIL"))
 	public void copyFrom(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo callbackInfo) {
 		if (alive) {
-			MagicAccessor.of(this).ifPresent(magicAccessor -> MagicAccessor.of(oldPlayer).ifPresent(oldMagicAccessor -> magicAccessor.setMagic(oldMagicAccessor.getMagic())));
-			BloodAccessor.of(this).ifPresent(bloodAccessor -> BloodAccessor.of(oldPlayer).ifPresent(oldBloodAccessor -> bloodAccessor.setBlood(oldBloodAccessor.getBlood())));
-			PolymorphAccessor.of(this).ifPresent(polymorphAccessor -> PolymorphAccessor.of(oldPlayer).ifPresent(oldPolymorphAccessor -> {
-				polymorphAccessor.setPolymorphUUID(oldPolymorphAccessor.getPolymorphUUID());
-				polymorphAccessor.setPolymorphName(oldPolymorphAccessor.getPolymorphName());
-			}));
-			RespawnTimerAccessor.of(this).ifPresent(respawnTimerAccessor -> RespawnTimerAccessor.of(oldPlayer).ifPresent(oldRespawnTimerAccessor -> respawnTimerAccessor.setRespawnTimer(oldRespawnTimerAccessor.getRespawnTimer())));
+			((MagicAccessor) this).setMagic(((MagicAccessor) oldPlayer).getMagic());
+			((BloodAccessor) this).setBlood(((BloodAccessor) oldPlayer).getBlood());
+			((PolymorphAccessor) this).setPolymorphUUID(((PolymorphAccessor) oldPlayer).getPolymorphUUID());
+			((PolymorphAccessor) this).setPolymorphName(((PolymorphAccessor) oldPlayer).getPolymorphName());
+			((RespawnTimerAccessor) this).setRespawnTimer(((RespawnTimerAccessor) oldPlayer).getRespawnTimer());
+			((TransformationAccessor) this).setAlternateForm(((TransformationAccessor) oldPlayer).getAlternateForm());
+			((WerewolfAccessor) this).setForcedTransformation(((WerewolfAccessor) oldPlayer).getForcedTransformation());
 		}
-		FortuneAccessor.of(this).ifPresent(fortuneAccessor -> FortuneAccessor.of(oldPlayer).ifPresent(oldFortuneAccessor -> fortuneAccessor.setFortune(oldFortuneAccessor.getFortune())));
-		CurseAccessor.of(this).ifPresent(curseAccessor -> CurseAccessor.of(oldPlayer).ifPresent(oldCurseAccessor -> curseAccessor.getCurses().addAll(oldCurseAccessor.getCurses())));
-		ContractAccessor.of(this).ifPresent(contractAccessor -> ContractAccessor.of(oldPlayer).ifPresent(oldContractAccessor -> contractAccessor.getContracts().addAll(oldContractAccessor.getContracts())));
+		((FortuneAccessor) this).setFortune(((FortuneAccessor) oldPlayer).getFortune());
+		((CurseAccessor) this).getCurses().addAll(((CurseAccessor) oldPlayer).getCurses());
+		((ContractAccessor) this).getContracts().addAll(((ContractAccessor) oldPlayer).getContracts());
+		((TransformationAccessor) this).setTransformation(((TransformationAccessor) oldPlayer).getTransformation());
+		((WerewolfAccessor) this).setWerewolfVariant(((WerewolfAccessor) oldPlayer).getWerewolfVariant());
 	}
 }

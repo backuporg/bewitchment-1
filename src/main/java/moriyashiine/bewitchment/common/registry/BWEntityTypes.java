@@ -2,8 +2,13 @@ package moriyashiine.bewitchment.common.registry;
 
 import com.terraformersmc.terraform.boat.TerraformBoat;
 import com.terraformersmc.terraform.boat.TerraformBoatEntity;
+import moriyashiine.bewitchment.api.entity.BroomEntity;
 import moriyashiine.bewitchment.common.Bewitchment;
+import moriyashiine.bewitchment.common.entity.DragonsBloodBroomEntity;
+import moriyashiine.bewitchment.common.entity.ElderBroomEntity;
+import moriyashiine.bewitchment.common.entity.JuniperBroomEntity;
 import moriyashiine.bewitchment.common.entity.living.*;
+import moriyashiine.bewitchment.common.entity.projectile.HornedSpearEntity;
 import moriyashiine.bewitchment.common.entity.projectile.SilverArrowEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
@@ -23,7 +28,13 @@ public class BWEntityTypes {
 	public static final EntityType<TerraformBoatEntity> ELDER_BOAT = create("elder_boat", FabricEntityTypeBuilder.<TerraformBoatEntity>create(SpawnGroup.MISC, (type, world) -> new TerraformBoatEntity(type, world, new TerraformBoat(BWObjects.ELDER_BOAT, BWObjects.ELDER_PLANKS.asItem(), new Identifier(Bewitchment.MODID, "textures/entity/boat/elder.png")))).dimensions(EntityType.BOAT.getDimensions()).build());
 	public static final EntityType<TerraformBoatEntity> DRAGONS_BLOOD_BOAT = create("dragons_blood_boat", FabricEntityTypeBuilder.<TerraformBoatEntity>create(SpawnGroup.MISC, (type, world) -> new TerraformBoatEntity(type, world, new TerraformBoat(BWObjects.DRAGONS_BLOOD_BOAT, BWObjects.DRAGONS_BLOOD_PLANKS.asItem(), new Identifier(Bewitchment.MODID, "textures/entity/boat/dragons_blood.png")))).dimensions(EntityType.BOAT.getDimensions()).build());
 	
+	public static final EntityType<JuniperBroomEntity> JUNIPER_BROOM = create("juniper_broom", FabricEntityTypeBuilder.create(SpawnGroup.MISC, JuniperBroomEntity::new).dimensions(EntityType.ARROW.getDimensions()).build());
+	public static final EntityType<BroomEntity> CYPRESS_BROOM = create("cypress_broom", FabricEntityTypeBuilder.create(SpawnGroup.MISC, BroomEntity::new).dimensions(JUNIPER_BROOM.getDimensions()).build());
+	public static final EntityType<ElderBroomEntity> ELDER_BROOM = create("elder_broom", FabricEntityTypeBuilder.create(SpawnGroup.MISC, ElderBroomEntity::new).dimensions(JUNIPER_BROOM.getDimensions()).build());
+	public static final EntityType<DragonsBloodBroomEntity> DRAGONS_BLOOD_BROOM = create("dragons_blood_broom", FabricEntityTypeBuilder.create(SpawnGroup.MISC, DragonsBloodBroomEntity::new).dimensions(JUNIPER_BROOM.getDimensions()).build());
+	
 	public static final EntityType<SilverArrowEntity> SILVER_ARROW = create("silver_arrow", FabricEntityTypeBuilder.<SilverArrowEntity>create(SpawnGroup.MISC, SilverArrowEntity::new).dimensions(EntityType.ARROW.getDimensions()).build());
+	public static final EntityType<HornedSpearEntity> HORNED_SPEAR = create("horned_spear", FabricEntityTypeBuilder.<HornedSpearEntity>create(SpawnGroup.MISC, HornedSpearEntity::new).dimensions(EntityType.TRIDENT.getDimensions()).build());
 	
 	public static final EntityType<OwlEntity> OWL = create("owl", OwlEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, OwlEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.75f)).build());
 	public static final EntityType<RavenEntity> RAVEN = create("raven", RavenEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, RavenEntity::new).dimensions(EntityDimensions.changing(0.4f, 0.4f)).build());
@@ -31,12 +42,15 @@ public class BWEntityTypes {
 	public static final EntityType<ToadEntity> TOAD = create("toad", ToadEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, ToadEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build());
 	
 	public static final EntityType<GhostEntity> GHOST = create("ghost", GhostEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, GhostEntity::new).dimensions(EntityDimensions.fixed(0.6f, 1.8f)).fireImmune().build());
-	
 	public static final EntityType<HellhoundEntity> HELLHOUND = create("hellhound", HellhoundEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, HellhoundEntity::new).dimensions(EntityType.WOLF.getDimensions()).fireImmune().build());
+	public static final EntityType<VampireEntity> VAMPIRE = create("vampire", VampireEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, VampireEntity::new).dimensions(EntityType.PILLAGER.getDimensions()).build());
+	public static final EntityType<WerewolfEntity> WEREWOLF = create("werewolf", WerewolfEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, WerewolfEntity::new).dimensions(EntityDimensions.fixed(0.8f, 2.8f)).build());
 	public static final EntityType<DemonEntity> DEMON = create("demon", DemonEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, DemonEntity::new).dimensions(EntityDimensions.fixed(0.8f, 2.4f)).fireImmune().build());
 	
 	public static final EntityType<LeonardEntity> LEONARD = create("leonard", LeonardEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, LeonardEntity::new).dimensions(EntityDimensions.fixed(0.8f, 2.8f)).fireImmune().build());
 	public static final EntityType<BaphometEntity> BAPHOMET = create("baphomet", BaphometEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, BaphometEntity::new).dimensions(EntityDimensions.fixed(0.8f, 2.8f)).fireImmune().build());
+	public static final EntityType<LilithEntity> LILITH = create("lilith", LilithEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, LilithEntity::new).dimensions(EntityDimensions.fixed(0.8f, 2.8f)).fireImmune().build());
+	public static final EntityType<HerneEntity> HERNE = create("herne", HerneEntity.createAttributes(), FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, HerneEntity::new).dimensions(EntityDimensions.fixed(0.8f, 2.8f)).fireImmune().build());
 	
 	private static <T extends LivingEntity> EntityType<T> create(String name, DefaultAttributeContainer.Builder attributes, EntityType<T> type) {
 		FabricDefaultAttributeRegistry.register(type, attributes);

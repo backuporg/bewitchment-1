@@ -6,6 +6,10 @@
   "mixins": [
 	"AbstractBlockStateMixin",
 	"AnimalMateGoalMixin",
+	"AreaEffectCloudEntityMixin",
+	"ArrowEntityMixin",
+	"BedBlockMixin",
+	"BlockEntityMixin",
 	"BlockMixin",
 	"BrewingRecipeRegistryMixin",
 	"CreeperEntityMixin",
@@ -24,6 +28,7 @@
 	"LivingEntityMixin",
 	"MobEntityMixin",
 	"PlayerEntityMixin",
+	"PotionEntityMixin",
 	"PotionItemMixin",
 	"PounceAtTargetGoalMixin",
 	"ServerPlayerEntityMixin",
@@ -31,16 +36,20 @@
 	"SpawnHelperMixin",
 	"StatusEffectAccessor",
 	"StatusEffectMixin",
+	"TippedArrowRecipeMixin",
 	"TreeDecoratorTypeAccessor",
 	"VillagerEntityMixin",
 	"ZombieVillagerEntityAccessor"
   ],
   "client": [
 	"client.ClientPlayerEntityMixin",
+	"client.ClientPlayNetworkHandlerMixin",
 	"client.ClientWorldMixin",
+	"client.GameRendererMixin",
 	"client.HeldItemFeatureRendererMixin",
 	"client.InGameHudMixin",
 	"client.MobEntityRendererMixin",
+	"client.PlayerEntityRendererMixin",
 	"client.TexturedRenderLayersMixin"
   ],
   "injectors": {

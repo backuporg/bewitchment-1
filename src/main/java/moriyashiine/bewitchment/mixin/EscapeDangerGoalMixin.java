@@ -14,16 +14,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@SuppressWarnings("ConstantConditions")
 @Mixin(EscapeDangerGoal.class)
 public abstract class EscapeDangerGoalMixin extends Goal {
 	@Shadow
 	@Final
 	protected PathAwareEntity mob;
 	
-	@Inject(method = "canStart", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "canStart", at = @At("RETURN"), cancellable = true)
 	private void canStart(CallbackInfoReturnable<Boolean> callbackInfo) {
-		if (!mob.world.isClient && mob.age % 20 == 0 && !mob.world.getEntitiesByClass(LivingEntity.class, new Box(mob.getBlockPos()).expand(8), entity -> mob.canSee(entity) && entity.isAlive() && CurseAccessor.of(entity).orElse(null).hasCurse(BWCurses.APATHY)).isEmpty()) {
+		if (!callbackInfo.getReturnValue() && !mob.world.isClient && mob.age % 20 == 0 && !mob.world.getEntitiesByClass(LivingEntity.class, new Box(mob.getBlockPos()).expand(8), entity -> mob.canSee(entity) && entity.isAlive() && ((CurseAccessor) entity).hasCurse(BWCurses.APATHY)).isEmpty()) {
 			callbackInfo.setReturnValue(true);
 		}
 	}

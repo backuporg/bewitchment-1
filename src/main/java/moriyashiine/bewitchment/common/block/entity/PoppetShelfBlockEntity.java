@@ -17,12 +17,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
+import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class PoppetShelfBlockEntity extends BlockEntity implements BlockEntityClientSerializable, Inventory {
+public class PoppetShelfBlockEntity extends BlockEntity implements BlockEntityClientSerializable, Tickable, Inventory {
 	public final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(9, ItemStack.EMPTY);
+	
+	public boolean markedForSync = false;
 	
 	public PoppetShelfBlockEntity(BlockEntityType<?> type) {
 		super(type);
@@ -55,13 +58,25 @@ public class PoppetShelfBlockEntity extends BlockEntity implements BlockEntityCl
 	}
 	
 	@Override
+	public void tick() {
+		if (world != null && !world.isClient && markedForSync) {
+			syncPoppetShelf();
+		}
+	}
+	
+	@Override
 	public int size() {
 		return inventory.size();
 	}
 	
 	@Override
 	public boolean isEmpty() {
-		return inventory.isEmpty();
+		for (int i = 0; i < size(); i++) {
+			if (getStack(i).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@Override

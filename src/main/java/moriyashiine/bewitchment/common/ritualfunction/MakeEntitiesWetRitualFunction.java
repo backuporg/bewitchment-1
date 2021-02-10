@@ -1,8 +1,8 @@
 package moriyashiine.bewitchment.common.ritualfunction;
 
-import moriyashiine.bewitchment.api.BewitchmentAPI;
-import moriyashiine.bewitchment.api.interfaces.entity.WetAccessor;
 import moriyashiine.bewitchment.api.registry.RitualFunction;
+import moriyashiine.bewitchment.common.entity.interfaces.WetAccessor;
+import moriyashiine.bewitchment.common.misc.BWUtil;
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -23,8 +23,8 @@ public class MakeEntitiesWetRitualFunction extends RitualFunction {
 	@Override
 	public void start(ServerWorld world, BlockPos glyphPos, BlockPos effectivePos, Inventory inventory, boolean catFamiliar) {
 		int radius = catFamiliar ? 9 : 3;
-		world.getEntitiesByClass(Entity.class, new Box(effectivePos).expand(radius), Entity::isAlive).forEach(entity -> WetAccessor.of(entity).ifPresent(wetAccessor -> wetAccessor.setWetTimer(6000 * (catFamiliar ? 3 : 1))));
-		BewitchmentAPI.getBlockPoses(effectivePos, radius, foundPos -> world.getBlockState(foundPos).getBlock() instanceof AbstractFireBlock).forEach(foundPos -> world.setBlockState(foundPos, Blocks.AIR.getDefaultState()));
+		world.getEntitiesByClass(Entity.class, new Box(effectivePos).expand(radius), Entity::isAlive).forEach(entity -> ((WetAccessor) entity).setWetTimer(6000 * (catFamiliar ? 3 : 1)));
+		BWUtil.getBlockPoses(effectivePos, radius, foundPos -> world.getBlockState(foundPos).getBlock() instanceof AbstractFireBlock).forEach(foundPos -> world.setBlockState(foundPos, Blocks.AIR.getDefaultState()));
 		super.start(world, glyphPos, effectivePos, inventory, catFamiliar);
 	}
 }

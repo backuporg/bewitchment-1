@@ -12,8 +12,20 @@ group = project.maven_group
 
 repositories {
     maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+    }
+    maven {
         name = "reach"
         url = "https://maven.jamieswhiteshirt.com/libs-release"
+    }
+    maven {
+        name = "Ladysnake Libs"
+        url = "https://dl.bintray.com/ladysnake/libs"
+    }
+    maven {
+        name = "NerdHubMC"
+        url = "https://maven.abusedmaster.xyz/"
     }
 }
 
@@ -34,6 +46,13 @@ dependencies {
     include "com.terraformersmc.terraform-api:terraform-wood-api-v1:${project.terraform_wood_api_version}"
     modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${project.reach_version}"
     include "com.jamieswhiteshirt:reach-entity-attributes:${project.reach_version}"
+    modImplementation "io.github.ladysnake:Impersonate:${impersonate_version}"
+    include "io.github.ladysnake:Impersonate:${impersonate_version}"
+    include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${cca_version}"
+    include "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${cca_version}"
+
+    modImplementation "com.github.Virtuoel:Pehkui:${project.pehkui_commit}"
+    modImplementation "com.github.emilyalexandra:trinkets:${trinkets_version}"
 
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api:${project.rei_version}"
     modRuntime "me.shedaniel:RoughlyEnoughItems:${project.rei_version}"

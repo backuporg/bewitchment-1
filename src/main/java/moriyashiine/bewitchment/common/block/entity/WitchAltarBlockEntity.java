@@ -120,12 +120,13 @@ public class WitchAltarBlockEntity extends BlockEntity implements BlockEntityCli
 					else {
 						power = Math.min(power + gain, maxPower);
 					}
-					PlayerLookup.around((ServerWorld) world, Vec3d.of(pos), 24).forEach(playerEntity -> MagicAccessor.of(playerEntity).ifPresent(magicAccessor -> {
-						if (magicAccessor.fillMagic(100, true) && drain(10, true)) {
-							magicAccessor.fillMagic(100, false);
+					PlayerLookup.around((ServerWorld) world, Vec3d.of(pos), 24).forEach(playerEntity -> {
+						MagicAccessor magicAccessor = (MagicAccessor) playerEntity;
+						if (magicAccessor.fillMagic(5, true) && drain(10, true)) {
+							magicAccessor.fillMagic(5, false);
 							drain(10, false);
 						}
-					}));
+					});
 				}
 			}
 		}
@@ -138,7 +139,12 @@ public class WitchAltarBlockEntity extends BlockEntity implements BlockEntityCli
 	
 	@Override
 	public boolean isEmpty() {
-		return inventory.isEmpty();
+		for (int i = 0; i < size(); i++) {
+			if (getStack(i).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	@Override

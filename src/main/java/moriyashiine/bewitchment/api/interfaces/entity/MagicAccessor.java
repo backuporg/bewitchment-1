@@ -1,16 +1,7 @@
 package moriyashiine.bewitchment.api.interfaces.entity;
 
-import java.util.Optional;
-
 public interface MagicAccessor {
-	int MAX_MAGIC = 10000;
-	
-	static Optional<MagicAccessor> of(Object entity) {
-		if (entity instanceof MagicAccessor) {
-			return Optional.of(((MagicAccessor) entity));
-		}
-		return Optional.empty();
-	}
+	int MAX_MAGIC = 100;
 	
 	int getMagic();
 	
@@ -24,8 +15,8 @@ public interface MagicAccessor {
 		if (getMagic() < MAX_MAGIC) {
 			if (!simulate) {
 				setMagic(Math.min(MAX_MAGIC, getMagic() + amount));
-				setMagicTimer(60);
 			}
+			setMagicTimer(60);
 			return true;
 		}
 		return false;
@@ -35,8 +26,8 @@ public interface MagicAccessor {
 		if (getMagic() - amount >= 0) {
 			if (!simulate) {
 				setMagic(getMagic() - amount);
-				setMagicTimer(60);
 			}
+			setMagicTimer(60);
 			return true;
 		}
 		return false;

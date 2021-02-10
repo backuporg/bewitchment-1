@@ -15,7 +15,6 @@ import net.minecraft.item.ItemUsage;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.*;
@@ -44,16 +43,14 @@ public class CursePoppetItem extends PoppetItem {
 				UUID uuid = TaglockItem.getTaglockUUID(stack);
 				for (ServerWorld serverWorld : server.getWorlds()) {
 					Entity entity = serverWorld.getEntity(uuid);
-					if (entity != null) {
+					if (entity instanceof CurseAccessor) {
 						Curse curse = BWRegistries.CURSES.get(new Identifier(stack.getOrCreateTag().getString("Curse")));
 						if (curse != null) {
-							CurseAccessor.of(entity).ifPresent(curseAccessor -> {
-								curseAccessor.addCurse(new Curse.Instance(curse, 168000));
-								world.playSound(null, user.getBlockPos(), BWSoundEvents.ENTITY_GENERIC_CURSE, SoundCategory.PLAYERS, 1, 1);
-								if (!(user instanceof PlayerEntity && ((PlayerEntity) user).isCreative())) {
-									stack.decrement(1);
-								}
-							});
+							((CurseAccessor) entity).addCurse(new Curse.Instance(curse, 168000));
+							world.playSound(null, user.getBlockPos(), BWSoundEvents.ENTITY_GENERIC_CURSE, SoundCategory.PLAYERS, 1, 1);
+							if (!(user instanceof PlayerEntity && ((PlayerEntity) user).isCreative())) {
+								stack.decrement(1);
+							}
 							return stack;
 						}
 					}
@@ -80,7 +77,7 @@ public class CursePoppetItem extends PoppetItem {
 	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
 		super.appendTooltip(stack, world, tooltip, context);
 		if (stack.hasTag() && stack.getOrCreateTag().contains("Curse")) {
-			tooltip.add(new TranslatableText("curse." + stack.getOrCreateTag().getString("Curse").replace(":", ".")).setStyle(Style.EMPTY.withColor(Formatting.DARK_RED)));
+			tooltip.add(new TranslatableText("curse." + stack.getOrCreateTag().getString("Curse").replace(":", ".")).formatted(Formatting.DARK_RED));
 		}
 	}
 }

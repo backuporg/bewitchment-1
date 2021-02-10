@@ -7,6 +7,7 @@ import moriyashiine.bewitchment.common.world.BWUniversalWorldState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Box;
@@ -28,7 +29,7 @@ public class GrotestqueStew extends Item {
 					}
 				}
 				if (closest instanceof Pledgeable && closest.canSee(user)) {
-					BewitchmentAPI.pledge(world, ((Pledgeable) closest).getPledgeUUID(), user.getUuid());
+					BewitchmentAPI.pledge(world, ((Pledgeable) closest).getPledgeID(), user.getUuid());
 					BWUniversalWorldState worldState = BWUniversalWorldState.get(world);
 					worldState.specificPledges.add(new Pair<>(user.getUuid(), closest.getUuid()));
 					worldState.markDirty();
@@ -36,6 +37,6 @@ public class GrotestqueStew extends Item {
 				}
 			}
 		}
-		return super.finishUsing(stack, world, user);
+		return Items.MUSHROOM_STEW.finishUsing(stack, world, user);
 	}
 }

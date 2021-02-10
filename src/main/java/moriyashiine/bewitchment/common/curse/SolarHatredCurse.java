@@ -1,7 +1,7 @@
 package moriyashiine.bewitchment.common.curse;
 
-import moriyashiine.bewitchment.api.interfaces.entity.RespawnTimerAccessor;
 import moriyashiine.bewitchment.api.registry.Curse;
+import moriyashiine.bewitchment.common.entity.interfaces.RespawnTimerAccessor;
 import net.minecraft.entity.LivingEntity;
 
 public class SolarHatredCurse extends Curse {
@@ -11,8 +11,7 @@ public class SolarHatredCurse extends Curse {
 	
 	@Override
 	public void tick(LivingEntity target) {
-		RespawnTimerAccessor respawnTimerAccessor = RespawnTimerAccessor.of(target).orElse(null);
-		if (respawnTimerAccessor != null && respawnTimerAccessor.getRespawnTimer() > 0) {
+		if (target instanceof RespawnTimerAccessor && ((RespawnTimerAccessor) target).getRespawnTimer() > 0) {
 			return;
 		}
 		if (target.getFireTicks() <= 1 && target.world.isDay() && target.world.isSkyVisible(target.getBlockPos())) {

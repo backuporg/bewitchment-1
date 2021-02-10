@@ -1,8 +1,7 @@
 package moriyashiine.bewitchment.common.statuseffect;
 
-import moriyashiine.bewitchment.api.BewitchmentAPI;
+import moriyashiine.bewitchment.common.misc.BWUtil;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectType;
 
@@ -17,9 +16,14 @@ public class DisjunctionStatusEffect extends StatusEffect {
 	}
 	
 	@Override
-	public void onApplied(LivingEntity entity, AttributeContainer attributes, int amplifier) {
+	public boolean canApplyUpdateEffect(int duration, int amplifier) {
+		return true;
+	}
+	
+	@Override
+	public void applyUpdateEffect(LivingEntity entity, int amplifier) {
 		if (!entity.world.isClient) {
-			BewitchmentAPI.attemptTeleport(entity, entity.getBlockPos(), 8 * (amplifier + 1), true);
+			BWUtil.attemptTeleport(entity, entity.getBlockPos(), 8 * (amplifier + 1), true);
 		}
 	}
 }

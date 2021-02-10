@@ -1,8 +1,8 @@
 package moriyashiine.bewitchment.common.item;
 
+import moriyashiine.bewitchment.api.BewitchmentAPI;
 import moriyashiine.bewitchment.api.interfaces.entity.MagicAccessor;
 import moriyashiine.bewitchment.common.Bewitchment;
-import moriyashiine.bewitchment.common.registry.BWStatusEffects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.item.TooltipContext;
@@ -18,7 +18,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -45,8 +44,8 @@ public class ScepterItem extends Item {
 	
 	@Override
 	public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-		MagicAccessor.of(user).ifPresent(magicAccessor -> {
-			if (!world.isClient && !user.hasStatusEffect(BWStatusEffects.INHIBITED) && ((user instanceof PlayerEntity && ((PlayerEntity) user).isCreative()) || magicAccessor.drainMagic(250, false))) {
+		if (user instanceof MagicAccessor) {
+			if (!world.isClient && user instanceof PlayerEntity && BewitchmentAPI.usePlayerMagic((PlayerEntity) user, 2, false)) {
 				PotionEntity potion = new PotionEntity(world, user);
 				List<StatusEffectInstance> effects = PotionUtil.getCustomPotionEffects(stack);
 				ItemStack potionStack = PotionUtil.setCustomPotionEffects(new ItemStack(Items.SPLASH_POTION), effects);
@@ -55,7 +54,7 @@ public class ScepterItem extends Item {
 				potion.setProperties(user, user.pitch, user.yaw, -20.0F, 0.5F, 1.0F);
 				world.spawnEntity(potion);
 				world.playSound(null, user.getBlockPos(), SoundEvents.ENTITY_SPLASH_POTION_THROW, SoundCategory.PLAYERS, 1, 1);
-				if (!(user instanceof PlayerEntity && ((PlayerEntity) user).isCreative())) {
+				if (!((PlayerEntity) user).isCreative()) {
 					stack.getOrCreateTag().putInt("PotionUses", stack.getOrCreateTag().getInt("PotionUses") - 1);
 					if (stack.getOrCreateTag().getInt("PotionUses") <= 0) {
 						stack.getOrCreateTag().put("CustomPotionEffects", new ListTag());
@@ -63,7 +62,7 @@ public class ScepterItem extends Item {
 					stack.damage(1, user, stackUser -> stackUser.sendToolBreakStatus(user.getActiveHand()));
 				}
 			}
-		});
+		}
 		return stack;
 	}
 	
@@ -80,7 +79,7 @@ public class ScepterItem extends Item {
 	@Environment(EnvType.CLIENT)
 	@Override
 	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-		tooltip.add(new TranslatableText(Bewitchment.MODID + ".scepter_uses", stack.getOrCreateTag().getInt("PotionUses")).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+		tooltip.add(new TranslatableText(Bewitchment.MODID + ".uses_left", stack.getOrCreateTag().getInt("PotionUses")).formatted(Formatting.GRAY));
 		Items.POTION.appendTooltip(stack, world, tooltip, context);
 	}
 }

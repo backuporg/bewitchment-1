@@ -1,7 +1,7 @@
 package moriyashiine.bewitchment.common.block;
 
-import moriyashiine.bewitchment.api.BewitchmentAPI;
-import moriyashiine.bewitchment.api.interfaces.misc.EntityShapeContextAdditionAccesor;
+import moriyashiine.bewitchment.common.misc.BWUtil;
+import moriyashiine.bewitchment.common.misc.interfaces.EntityShapeContextAdditionAccessor;
 import moriyashiine.bewitchment.common.registry.BWObjects;
 import moriyashiine.bewitchment.common.registry.BWProperties;
 import moriyashiine.bewitchment.common.world.BWWorldState;
@@ -43,13 +43,10 @@ public class BrambleBlock extends SugarCaneBlock {
 	
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		if (this == BWObjects.THICK_BRAMBLE && context instanceof EntityShapeContext) {
-			EntityShapeContextAdditionAccesor accessor = EntityShapeContextAdditionAccesor.of(context).orElse(null);
-			if (accessor != null) {
-				Entity entity = accessor.getEntity();
-				if (entity instanceof LivingEntity && !entity.isSneaking()) {
-					return VoxelShapes.fullCube();
-				}
+		if (this == BWObjects.THICK_BRAMBLE && context instanceof EntityShapeContextAdditionAccessor) {
+			Entity entity = ((EntityShapeContextAdditionAccessor) context).getEntity();
+			if (entity instanceof LivingEntity && !entity.isSneaking()) {
+				return VoxelShapes.fullCube();
 			}
 		}
 		return super.getCollisionShape(state, world, pos, context);
@@ -89,7 +86,7 @@ public class BrambleBlock extends SugarCaneBlock {
 		if (!world.isClient && entity instanceof LivingEntity) {
 			LivingEntity livingEntity = (LivingEntity) entity;
 			if (this == BWObjects.ENDER_BRAMBLE) {
-				BewitchmentAPI.attemptTeleport(livingEntity, entity.getBlockPos(), 12, true);
+				BWUtil.attemptTeleport(livingEntity, entity.getBlockPos(), 64, true);
 			}
 			if (this == BWObjects.SCORCHED_BRAMBLE) {
 				livingEntity.setOnFireFor(10);

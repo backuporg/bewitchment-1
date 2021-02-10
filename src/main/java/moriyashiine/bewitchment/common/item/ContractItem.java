@@ -19,7 +19,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.*;
@@ -53,14 +52,14 @@ public class ContractItem extends Item {
 						if (entity != null) {
 							Contract contract = BWRegistries.CONTRACTS.get(new Identifier(stack.getOrCreateTag().getString("Contract")));
 							if (contract != null) {
-								ContractAccessor.of(entity).ifPresent(contractAccessor -> {
-									contractAccessor.addContract(new Contract.Instance(contract, 168000));
+								if (entity instanceof ContractAccessor) {
+									((ContractAccessor) entity).addContract(new Contract.Instance(contract, 168000));
 									contract.finishUsing(user, ((ContractAccessor) user).hasNegativeEffects());
 									world.playSound(null, user.getBlockPos(), BWSoundEvents.ITEM_CONTRACT_USE, SoundCategory.PLAYERS, 1, 1);
 									if (!(user instanceof PlayerEntity && ((PlayerEntity) user).isCreative())) {
 										stack.decrement(1);
 									}
-								});
+								}
 								return stack;
 							}
 						}
@@ -99,10 +98,10 @@ public class ContractItem extends Item {
 	@Override
 	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
 		if (TaglockItem.hasTaglock(stack)) {
-			tooltip.add(new LiteralText(TaglockItem.getTaglockName(stack)).setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
+			tooltip.add(new LiteralText(TaglockItem.getTaglockName(stack)).formatted(Formatting.GRAY));
 		}
 		if (stack.hasTag() && stack.getOrCreateTag().contains("Contract")) {
-			tooltip.add(new TranslatableText("contract." + stack.getOrCreateTag().getString("Contract").replace(":", ".")).setStyle(Style.EMPTY.withColor(Formatting.DARK_RED)));
+			tooltip.add(new TranslatableText("contract." + stack.getOrCreateTag().getString("Contract").replace(":", ".")).formatted(Formatting.DARK_RED));
 		}
 	}
 }
